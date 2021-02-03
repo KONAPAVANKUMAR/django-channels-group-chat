@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+	<style type="text/css">
+		#lefttext {
+			position: absolute;
+			left: 0px;
+			padding: 3px;
+			padding-left: 6px;
+			padding-right: 6px;
+			border-radius: 5px;
+			color: white;
+			background-color: #0079E5;
+		}
+	</style>
+	
+</head>
+<body>
+	<div style="position: relative;height: 100vh;width: 100vw;" class="d-flex justify-content-center align-items-center">
+		<h1 style="top: 0;position: absolute;">welcome to room no <span style="color: #0079E5">{{room_no}}<span></h1>
+
+		<div id="messagescontainer" style="overflow-y: auto;width: 40vw;height: 80vh;position: relative;" class="container">
+			{% for message in messages %}
+			<div id="lefttext">{{message}}</div>
+			<br><br>
+			{% endfor %}
+
+
+		</div>
+
+		<div style="position: absolute;bottom: 20px;width: 100vw" class="d-flex justify-content-center">
+			<input id="messageinputfield" class="form-control" style="text-align: center;width: 40vw" type="text"  name="">
+			<input id="sendbutton" class="btn btn-primary" value="send" type="submit" name="">
+		</div>
+	</div>
+</body>
+</html>
+<script type="text/javascript">
+	
+	const chatSocket = new WebSocket('ws://'+window.location.host+'/ws/chat/{{room_no}}/');
+
+	document.querySelector('#sendbutton').onclick = function(e){
+		const message = document.querySelector('#messageinputfield').value;
+		chatSocket.send(JSON.stringify({'message':'{{name}} : '+message}));
+		document.querySelector('#messageinputfield').value = '';
+	}
+
+	document.querySelector('#messageinputfield').onkeyup = function(e){
+		if(e.keyCode==13){
+			document.querySelector('#sendbutton').click();
+		}
+	}
+
+	function scrollToBottom(){
+		document.querySelector('#messagescontainer').scrollTo({top:document.querySelector('#messagescontainer').scrollHeight,behaviour : 'smooth'});
+	}
+
+	chatSocket.onmessage = function(e){
+		const data = JSON.parse(e.data);
+		document.querySelector('#messagescontainer').innerHTML += '<div id ="lefttext">'+data.message+'</div>'+'<br><br>';
+		scrollToBottom();
+	}	
+
+</script>
+
+
